@@ -26,7 +26,7 @@ export function Header({
   return (
     <View style={styles.container}>
       {eyebrow ? (
-        <Text variant="overline" tone={dark ? 'onDarkMuted' : 'violet'}>
+        <Text variant="caption" tone={dark ? 'onDarkMuted' : 'muted'}>
           {eyebrow}
         </Text>
       ) : null}

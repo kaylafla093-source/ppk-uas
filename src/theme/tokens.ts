@@ -93,10 +93,10 @@ export const shadow = {
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
-  // 0 12px 32px -4px rgba(91,59,232,.12)
+  // 0 12px 32px -4px rgba(23,20,31,.08) — neutral soft shadow (unslop: no violet glow).
   elevated: {
-    shadowColor: '#5B3BE8',
-    shadowOpacity: 0.12,
+    shadowColor: '#17141F',
+    shadowOpacity: 0.08,
     shadowRadius: 32,
     shadowOffset: { width: 0, height: 12 },
     elevation: 6,

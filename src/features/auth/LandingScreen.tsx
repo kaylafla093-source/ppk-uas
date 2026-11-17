@@ -42,7 +42,7 @@ export function LandingScreen({ navigation }: Props) {
       <View style={styles.intro}>
         <View style={styles.wordmark}>
           <View style={styles.dot} />
-          <Text variant="overline" tone="violet">
+          <Text variant="title" tone="ink">
             LabPresensi
           </Text>
         </View>

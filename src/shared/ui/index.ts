@@ -4,6 +4,7 @@ export {
   type AvatarProps,
   type AvatarTone,
 } from './Avatar';
+export { AppTopBar, type AppTopBarProps } from './AppTopBar';
 export { Banner } from './Banner';
 export { BottomDock, type DockTab } from './BottomDock';
 export { Button } from './Button';

@@ -53,6 +53,8 @@ import { HomeScreen } from './HomeScreen';
 
 import type { RootStackParamList } from './navigation';
 
+import { NotificationsScreen } from './NotificationsScreen';
+
 import { ProfileEditScreen } from './ProfileEditScreen';
 
 import { ProfileScreen } from './ProfileScreen';
@@ -368,6 +370,14 @@ export function AppNavigator() {
                 name="ProfileEdit"
 
                 component={ProfileEditScreen}
+
+                options={{ headerShown: false }}
+              />
+
+              <Stack.Screen
+                name="Notifications"
+
+                component={NotificationsScreen}
 
                 options={{ headerShown: false }}
               />

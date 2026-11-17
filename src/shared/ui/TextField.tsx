@@ -56,7 +56,7 @@ export function TextField({
       >
         <View style={styles.body}>
           <Text
-            variant="overline"
+            variant="label"
             tone={invalid ? 'danger' : focused ? 'violet' : 'muted'}
             numberOfLines={1}
           >
