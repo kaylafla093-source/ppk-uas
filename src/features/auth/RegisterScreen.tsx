@@ -187,7 +187,7 @@ export function RegisterScreen({ navigation }: Props) {
         />
 
         <View style={styles.roleBlock}>
-          <Text variant="overline" tone="muted">
+          <Text variant="label" tone="muted">
             Daftar sebagai
           </Text>
           <View style={styles.roleRow}>

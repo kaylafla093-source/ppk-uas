@@ -2,9 +2,9 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { formatSessionDate } from '../../app/formatters';
 import type { RootStackParamList } from '../../app/navigation';
 import {
+  AppTopBar,
   Banner,
   Button,
   Card,
@@ -13,6 +13,7 @@ import {
   EmptyState,
   ErrorState,
   Header,
+  IconButton,
   ListRow,
   LoadingState,
   Screen,
@@ -40,9 +41,31 @@ export function AssistantHome({ navigation }: { navigation: Nav }) {
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
+  const topBar = (
+    <AppTopBar
+      logoIcon="school-outline"
+      title="LabPresensi"
+      trailing={
+        <>
+          <IconButton
+            icon="notifications-outline"
+            accessibilityLabel="Notifikasi"
+            onPress={() => navigation.navigate('Notifications')}
+          />
+          <IconButton
+            icon="person-outline"
+            accessibilityLabel="Profil"
+            onPress={() => navigation.navigate('Profile')}
+          />
+        </>
+      }
+    />
+  );
+
   if (vm.loading) {
     return (
       <Screen>
+        {topBar}
         <LoadingState label="Memuat sesi…" />
       </Screen>
     );
@@ -50,6 +73,7 @@ export function AssistantHome({ navigation }: { navigation: Nav }) {
   if (vm.error) {
     return (
       <Screen>
+        {topBar}
         <ErrorState
           title="Gagal memuat sesi"
           message={vm.error}
@@ -59,11 +83,28 @@ export function AssistantHome({ navigation }: { navigation: Nav }) {
     );
   }
 
-  const firstName = user?.displayName?.trim().split(/\s+/)[0] || 'Asisten';
+  const today = new Date();
+  const isSameDay = (iso: string) => {
+    const d = new Date(iso);
+    return (
+      d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate()
+    );
+  };
+  const todaySessions = vm.sessions.filter((s) => isSameDay(s.startsAt));
+  const todayLabel =
+    new Intl.DateTimeFormat('id-ID', { weekday: 'long' }).format(today) +
+    ', ' +
+    new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long' }).format(
+      today,
+    );
+
   const byStart = [...vm.sessions].sort(
     (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
   );
   const active =
+    todaySessions.find((s) => s.status === 'open') ??
     byStart.find((s) => s.status === 'open') ??
     byStart.find((s) => s.status === 'scheduled');
 
@@ -107,9 +148,10 @@ export function AssistantHome({ navigation }: { navigation: Nav }) {
 
   return (
     <Screen>
+      {topBar}
       <Header
-        eyebrow={formatSessionDate(new Date().toISOString())}
-        title={`Halo, ${firstName}`}
+        eyebrow={todayLabel}
+        title={user?.displayName?.trim() || 'Asisten'}
       />
 
       {feedback ? (
@@ -182,6 +224,33 @@ export function AssistantHome({ navigation }: { navigation: Nav }) {
           }
         />
       )}
+
+      {active && todaySessions.length > 0 ? (
+        <View style={styles.section}>
+          <SectionHeader title="Jadwal hari ini" />
+          {todaySessions.map((s) => (
+            <ListRow
+              key={s.id}
+              title={`${formatTimeRange(s.startsAt, s.endsAt)} · ${s.courseName}`}
+              meta={s.groupName}
+              onPress={() =>
+                navigation.navigate('AssistantSessionDetail', {
+                  sessionId: s.id,
+                })
+              }
+              accessibilityHint="Membuka detail sesi"
+              trailing={
+                <StatusBadge
+                  label={s.status === 'open' ? 'Berlangsung' : 'Terjadwal'}
+                  tone={s.status === 'open' ? 'violet' : 'lavender'}
+                  dot={s.status === 'open'}
+                  live={s.status === 'open'}
+                />
+              }
+            />
+          ))}
+        </View>
+      ) : null}
 
       {active && recent.length > 0 ? (
         <View style={styles.section}>

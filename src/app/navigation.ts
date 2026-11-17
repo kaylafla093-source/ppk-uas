@@ -27,6 +27,7 @@ export type RootStackParamList = {
   Calendar: undefined;
   Profile: undefined;
   ProfileEdit: undefined;
+  Notifications: undefined;
 };
 
 import type { ActorRole } from '../state/AuthContext';

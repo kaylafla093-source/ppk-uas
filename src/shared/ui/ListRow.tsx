@@ -80,8 +80,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.panel,
   },
   pressed: {
-    borderColor: colors.violet,
-    backgroundColor: colors.lavenderSubtle,
+    // Quiet surface step on press (unslop: no violet highlight, no glow).
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
   text: { flex: 1, gap: 2 },
   trailing: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

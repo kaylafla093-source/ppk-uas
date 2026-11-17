@@ -89,7 +89,7 @@ export function DateTimeField({
       >
         <View style={styles.body}>
           <Text
-            variant="overline"
+            variant="label"
             tone={invalid ? 'danger' : 'muted'}
             numberOfLines={1}
           >

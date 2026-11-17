@@ -19,7 +19,7 @@ export function SectionHeader({
   return (
     <View style={styles.row}>
       <Text
-        variant="overline"
+        variant="label"
         tone="muted"
         accessibilityRole="header"
         numberOfLines={1}

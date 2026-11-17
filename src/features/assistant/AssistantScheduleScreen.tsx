@@ -56,7 +56,6 @@ export function AssistantScheduleScreen({ navigation }: Props) {
     <Screen>
       <Header
         title="Jadwal"
-        accent="sesi"
         description={`${sessions.length} sesi praktikum`}
       />
 

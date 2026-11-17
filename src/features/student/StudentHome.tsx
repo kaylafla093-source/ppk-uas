@@ -4,12 +4,14 @@ import { StyleSheet, View } from 'react-native';
 import { formatSessionDate } from '../../app/formatters';
 import type { RootStackParamList } from '../../app/navigation';
 import {
+  AppTopBar,
   Button,
   Card,
   CardContent,
   EmptyState,
   ErrorState,
   Header,
+  IconButton,
   ListRow,
   LoadingState,
   Screen,
@@ -24,13 +26,13 @@ import { formatClock, formatTimeRange } from './formatters';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
-const STATUS_LABEL = {
+const STATUS_LABEL: Record<string, string> = {
   open: 'Terbuka',
   scheduled: 'Terjadwal',
   closed: 'Tertutup',
-} as const;
+};
 
-const STATUS_TONE: Record<keyof typeof STATUS_LABEL, BadgeTone> = {
+const STATUS_TONE: Record<string, BadgeTone> = {
   open: 'violet',
   scheduled: 'lavender',
   closed: 'neutral',
@@ -38,21 +40,67 @@ const STATUS_TONE: Record<keyof typeof STATUS_LABEL, BadgeTone> = {
 
 const WEEK_ROWS = 4;
 
+function isSameDay(a: string, b: Date) {
+  const d = new Date(a);
+  return (
+    d.getFullYear() === b.getFullYear() &&
+    d.getMonth() === b.getMonth() &&
+    d.getDate() === b.getDate()
+  );
+}
+
+function formatTodayLong(iso: string): string {
+  // "Senin, 17 November" — nama hari pendek + tanggal, tanpa tahun.
+  const d = new Date(iso);
+  const weekday = new Intl.DateTimeFormat('id-ID', { weekday: 'long' }).format(
+    d,
+  );
+  const date = new Intl.DateTimeFormat('id-ID', {
+    day: 'numeric',
+    month: 'long',
+  }).format(d);
+  return `${weekday}, ${date}`;
+}
+
 export function StudentHome({ navigation }: { navigation: Nav }) {
   const { user } = useAuth();
   const { sessions, attendanceHistory, loading, error, retry } =
     useStudentAttendanceViewModel();
 
+  const topBar = (
+    <AppTopBar
+      logoIcon="school-outline"
+      title="LabPresensi"
+      trailing={
+        <>
+          <IconButton
+            icon="notifications-outline"
+            accessibilityLabel="Notifikasi"
+            onPress={() => navigation.navigate('Notifications')}
+          />
+          <IconButton
+            icon="person-outline"
+            accessibilityLabel="Profil"
+            onPress={() => navigation.navigate('Profile')}
+          />
+        </>
+      }
+    />
+  );
+
   if (loading) {
     return (
       <Screen>
+        {topBar}
         <LoadingState label="Memuat jadwal…" />
       </Screen>
     );
   }
+
   if (error) {
     return (
       <Screen>
+        {topBar}
         <ErrorState
           title="Gagal memuat jadwal"
           message={error}
@@ -62,31 +110,17 @@ export function StudentHome({ navigation }: { navigation: Nav }) {
     );
   }
 
-  const firstName = user?.displayName?.trim().split(/\s+/)[0] || 'Praktikan';
-  const header = (
-    <Header
-      eyebrow={formatSessionDate(new Date().toISOString())}
-      title={`Halo, ${firstName}`}
-    />
-  );
-
-  if (sessions.length === 0) {
-    return (
-      <Screen>
-        {header}
-        <EmptyState
-          icon="school-outline"
-          title="Belum terdaftar di kelas"
-          description="Minta asisten menambahkan emailmu ke kelas praktikum. Jadwal akan muncul di sini."
-        />
-      </Screen>
-    );
-  }
-
+  const today = new Date();
   const byStart = [...sessions].sort(
     (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
   );
+
+  // Sesi untuk hari ini (container jadwal hari ini).
+  const todaySessions = byStart.filter((s) => isSameDay(s.startsAt, today));
+
   const hero =
+    todaySessions.find((s) => s.status === 'open') ??
+    todaySessions.find((s) => s.status === 'scheduled') ??
     byStart.find((s) => s.status === 'open') ??
     byStart.find((s) => s.status === 'scheduled');
   const record = hero
@@ -99,8 +133,16 @@ export function StudentHome({ navigation }: { navigation: Nav }) {
   const openDetail = (sessionId: string) =>
     navigation.navigate('StudentSessionDetail', { sessionId });
 
+  const header = (
+    <Header
+      eyebrow={formatTodayLong(today.toISOString())}
+      title={user?.displayName?.trim() || 'Praktikan'}
+    />
+  );
+
   return (
     <Screen>
+      {topBar}
       {header}
 
       {hero ? (
@@ -113,6 +155,8 @@ export function StudentHome({ navigation }: { navigation: Nav }) {
                   : 'Sesi berikutnya'
               }
               tone="lavender"
+              dot
+              live={hero.status === 'open'}
             />
             <Text variant="displayHero" tone="onDark">
               {formatTimeRange(hero.startsAt, hero.endsAt)}
@@ -153,6 +197,33 @@ export function StudentHome({ navigation }: { navigation: Nav }) {
         />
       )}
 
+      {todaySessions.length > 0 ? (
+        <View style={styles.section}>
+          <SectionHeader
+            title="Jadwal hari ini"
+            actionLabel="Lihat semua"
+            onAction={() => navigation.navigate('StudentSchedule')}
+          />
+          {todaySessions.map((s) => (
+            <ListRow
+              key={s.id}
+              title={`${formatTimeRange(s.startsAt, s.endsAt)} · ${s.courseName}`}
+              meta={`${s.groupName}${s.lab ? ` · ${s.lab}` : ''}`}
+              onPress={() => openDetail(s.id)}
+              accessibilityHint="Membuka detail sesi"
+              trailing={
+                <StatusBadge
+                  label={STATUS_LABEL[s.status] ?? s.status}
+                  tone={STATUS_TONE[s.status] ?? 'neutral'}
+                  dot={s.status === 'open'}
+                  live={s.status === 'open'}
+                />
+              }
+            />
+          ))}
+        </View>
+      ) : null}
+
       {upcoming.length > 0 ? (
         <View style={styles.section}>
           <SectionHeader
@@ -169,8 +240,8 @@ export function StudentHome({ navigation }: { navigation: Nav }) {
               accessibilityHint="Membuka detail sesi"
               trailing={
                 <StatusBadge
-                  label={STATUS_LABEL[s.status]}
-                  tone={STATUS_TONE[s.status]}
+                  label={STATUS_LABEL[s.status] ?? s.status}
+                  tone={STATUS_TONE[s.status] ?? 'neutral'}
                 />
               }
             />

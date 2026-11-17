@@ -38,8 +38,7 @@ export function AssistantAllAttendanceScreen({ navigation }: Props) {
   return (
     <Screen>
       <Header
-        title="Rekap"
-        accent="presensi"
+        title="Rekap presensi"
         description="Semua catatan hadir dari sesi Anda"
       />
 
