@@ -149,9 +149,9 @@ Sebelum 4 branch fitur dibuat dari `main`:
 **Mencakup SRS:** R5 (pengajuan izin praktikan), R6 (integrasi API AI pendukung tanpa keputusan otomatis), R7 (pemeriksaan & keputusan izin asisten), R4 & R8 (real-time status izin, validasi, AI unavailable handling).
 
 **Tanggung jawab**
-- Mengimplementasikan adapter API model AI pengajar (`src/services/ai/leaveClassifier.ts`):
-  - Mengirim alasan izin ke `EXPO_PUBLIC_AI_CLASSIFIER_URL` dengan timeout (8 detik) dan parsing response terstandar.
-  - Menangani kegagalan jaringan/timeout/response tidak valid dengan mengembalikan `{ status: 'unavailable', category: null, confidence: null }` agar pengajuan izin tetap berjalan aman tanpa keputusan otomatis.
+- Mengimplementasikan adapter model AI lokal EDOM (`ai/leaveClassifier.ts`):
+  - Memuat `ai/model-edom.json` + `ai/sentiment.js` (inference on-device, tanpa API eksternal) dan memetakan label sentimen ke kategori izin (`alasan_strong`/`alasan_netral`/`alasan_weak`) + confidence 0–1.
+  - Mengembalikan `{ status: 'unavailable', category: null, confidence: null }` untuk input kosong/teks tak dikenal agar pengajuan izin tetap berjalan aman tanpa keputusan otomatis.
 - Mengimplementasikan service Firestore izin (`src/services/firestore/leaveService.ts`):
   - Submit pengajuan izin oleh praktikan (`status: 'pending'` wajib, menyimpan `aiPrediction` sebagai informasi pendukung).
   - Real-time listener (`onSnapshot`) daftar izin milik praktikan (`studentId == uid`) dan daftar izin untuk asisten.

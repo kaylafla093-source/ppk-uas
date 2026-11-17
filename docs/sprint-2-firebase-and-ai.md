@@ -22,7 +22,6 @@ EXPO_PUBLIC_FIREBASE_PROJECT_ID=
 EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 EXPO_PUBLIC_FIREBASE_APP_ID=
-EXPO_PUBLIC_AI_CLASSIFIER_URL=
 ```
 
 ### Inisialisasi (`src/services/firebase.ts`)
@@ -334,6 +333,5 @@ export async function classifyLeaveReason(reason: string): Promise<AiClassificat
 ```
 
 - **Input:** `reason` (string alasan ketidakhadiran yang sudah di-trim).
-- **HTTP Request default:** `POST ${EXPO_PUBLIC_AI_CLASSIFIER_URL}` dengan header `Content-Type: application/json` dan body `{ text: reason, reason }` (kirim sesuai spesifikasi endpoint pengajar).
-- **Normalisasi response:** baca `data.category ?? data.label ?? data.prediction ?? null` dan `data.confidence ?? data.score ?? null`. Bila tidak ada kategori valid, perlakukan sebagai `'unavailable'`.
+- **Model lokal EDOM (default, tanpa API eksternal):** adapter memuat `ai/model-edom.json` + `ai/sentiment.js` dan memetakan label sentimen ke kategori: `positif` → `alasan_strong`, `netral` → `alasan_netral`, `negatif` → `alasan_weak`. Confidence dihitung dari margin antar skor LinearSVC (skala 0–1). Teks tanpa kata yang dikenal model menghasilkan `alasan_netral` (confidence 0.5); input kosong menghasilkan `unavailable`.
 

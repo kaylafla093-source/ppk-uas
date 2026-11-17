@@ -13,17 +13,18 @@ import {
   TextField,
   TopBar,
 } from '../../shared/ui';
-import { ListFeedback, RequestCard } from './components';
+import { ListFeedback, RequestCard, aiCategoryLabels } from './components';
 import { useAssistantLeaveViewModel } from './useAssistantLeaveViewModel';
 
 function aiPredictionLabel(prediction: AiClassificationResult): string {
   if (prediction.status !== 'classified') return 'tidak tersedia';
 
+  const label = aiCategoryLabels[prediction.category ?? ''] ?? 'Alasan Netral';
   const confidence =
     prediction.confidence !== null
       ? ` (${Math.round(prediction.confidence * 100)}%)`
       : '';
-  return `${prediction.category ?? '-'}${confidence}`;
+  return `${label}${confidence}`;
 }
 
 type Props = NativeStackScreenProps<

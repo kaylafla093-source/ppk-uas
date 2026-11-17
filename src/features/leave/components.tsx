@@ -20,6 +20,19 @@ export const leaveLabels = {
   rejected: 'Ditolak',
 };
 
+// Label manusia untuk kategori AI (model EDOM lokal).
+export const aiCategoryLabels: Record<string, string> = {
+  alasan_strong: 'Alasan Kuat',
+  alasan_netral: 'Alasan Netral',
+  alasan_weak: 'Alasan Lemah',
+};
+
+const aiCategoryTone: Record<string, BadgeTone> = {
+  alasan_strong: 'success',
+  alasan_netral: 'lavender',
+  alasan_weak: 'pink',
+};
+
 const leaveTone: Record<LeaveRequest['status'], BadgeTone> = {
   pending: 'lavender',
   approved: 'success',
@@ -38,13 +51,24 @@ export function AiResult({
       message="Klasifikasi AI tidak tersedia saat ini. Pengajuan tetap dapat disimpan untuk diperiksa asisten."
     />
   ) : (
-    <Text variant="caption" tone="muted">
-      Kategori AI: {prediction.category}
-      {prediction.confidence !== null
-        ? ` (${Math.round(prediction.confidence * 100)}%)`
-        : ''}
-      . Hasil ini hanya informasi pendukung; keputusan dibuat asisten.
-    </Text>
+    <>
+      <View style={styles.aiRow}>
+        <StatusBadge
+          label={aiCategoryLabels[prediction.category ?? ''] ?? 'Alasan Netral'}
+          tone={aiCategoryTone[prediction.category ?? ''] ?? 'lavender'}
+          dot
+        />
+        {prediction.confidence !== null ? (
+          <Text variant="caption" tone="muted">
+            keyakinan {Math.round(prediction.confidence * 100)}%
+          </Text>
+        ) : null}
+      </View>
+      <Text variant="caption" tone="muted">
+        Hasil otomatis dari model lokal (EDOM). Hanya informasi pendukung;
+        keputusan tetap ada pada asisten.
+      </Text>
+    </>
   );
 }
 
@@ -135,6 +159,11 @@ export const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   flex: { flex: 1, flexShrink: 1 },
+  aiRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
   requestHead: {
     flexDirection: 'row',
     alignItems: 'flex-start',
